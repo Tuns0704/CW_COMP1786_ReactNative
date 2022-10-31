@@ -6,6 +6,15 @@ import { useDbContext } from "../context/DbContext";
 import { updateTrip, deleteTrip } from '../services/db-service';
 
 const EditTrip = ({ navigation, route }) => {
+  const [trip, setTrip] = useState({});
+  const [name, setName] = useState();
+  const [destination, setDestination] = useState();
+  const [date, setDate] = useState();
+  const [risk, setRisk] = useState();
+  const [description, setDescription] = useState();
+  const [error, setError] = useState(null);
+  const { tripId } = route.params;
+
   const db = useDbContext();
   useEffect(function () {
     async function fetchData() {
@@ -18,15 +27,6 @@ const EditTrip = ({ navigation, route }) => {
     }
     fetchData();
   }, [db]);
-
-  const [trip, setTrip] = useState([]);
-  const [name, setName] = useState();
-  const [destination, setDestination] = useState();
-  const [date, setDate] = useState();
-  const [risk, setRisk] = useState();
-  const [description, setDescription] = useState();
-  const [error, setError] = useState(null);
-  const { tripId } = route.params;
 
   async function EditTrip() {
     if (name === "") {
@@ -60,24 +60,24 @@ const EditTrip = ({ navigation, route }) => {
     }
   }
 
-  async function DeleteTrip() {
-    try {
-      await deleteTrip(db, tripId);
-      Alert.alert(
-        'Success',
-        'Delete Trip successfully',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('Home')
-          }
-        ],
-        { cancelable: false }
-      );
-    } catch (e) {
-      setError(`An error occurred while delete the Trip: ${e.message}`);
-    }
-  }
+  const showConfirmDialog = () => {
+    return Alert.alert(
+      "Are you sure?",
+      "Are you sure to delete this trip?",
+      [
+        {
+          text: "Yes",
+          onPress: () => {
+            deleteTrip(db, tripId);
+            navigation.navigate('Home');
+          },
+        },
+        {
+          text: "No",
+        },
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -117,7 +117,7 @@ const EditTrip = ({ navigation, route }) => {
           placeholder={trip.description} />
         <View style={styles.buttonLayout}>
           <Button color={"#54B435"} title="Save" onPress={EditTrip} />
-          <Button color={"#E14D2A"} title="Delete" onPress={DeleteTrip} />
+          <Button color={"#E14D2A"} title="Delete" onPress={showConfirmDialog} />
         </View>
         {error && <Text style={styles.textError}>{error}</Text>}
       </ScrollView>
