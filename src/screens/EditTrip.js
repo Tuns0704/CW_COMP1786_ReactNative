@@ -20,11 +20,11 @@ const EditTrip = ({ navigation, route }) => {
   }, [db]);
 
   const [trip, setTrip] = useState([]);
-  const [name, setName] = useState(trip?.name);
-  const [destination, setDestination] = useState(trip?.destination);
-  const [date, setDate] = useState(trip?.date);
-  const [risk, setRisk] = useState(trip?.riskAssessment);
-  const [description, setDescription] = useState(trip?.description);
+  const [name, setName] = useState();
+  const [destination, setDestination] = useState();
+  const [date, setDate] = useState();
+  const [risk, setRisk] = useState();
+  const [description, setDescription] = useState();
   const [error, setError] = useState(null);
   const { tripId } = route.params;
 

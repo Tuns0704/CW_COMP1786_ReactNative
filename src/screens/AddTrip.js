@@ -85,7 +85,7 @@ const AddTrip = ({ navigation }) => {
         <TextInput
           style={styles.input}
           onChangeText={description => setDescription(description)}
-          placeholder="Trip Destination" />
+          placeholder="Trip Description" />
         <Button
           color={"#54B435"}
           title="Add"

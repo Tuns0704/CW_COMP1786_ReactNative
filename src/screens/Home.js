@@ -1,7 +1,7 @@
 import React, { useState, useLayoutEffect, useCallback } from 'react';
-import { StyleSheet, View, FlatList, Button, Text, SafeAreaView } from 'react-native';
+import { StyleSheet, View, FlatList, Button, Text, SafeAreaView, Alert } from 'react-native';
 import { useFocusEffect } from "@react-navigation/native";
-import { getTrips } from "../services/db-service";
+import { getTrips, deleteAll } from "../services/db-service";
 import TripListItem from '../components/TripListItem';
 import { useDbContext } from "../context/DbContext";
 
@@ -22,7 +22,7 @@ const Home = ({ navigation }) => {
             />
             <Button
               color="#E14D2A"
-              onPress={() => navigation.navigate("AddTrip")}
+              onPress={() => showConfirmDialog()}
               title="Remove Trips"
             />
           </View>
@@ -30,6 +30,25 @@ const Home = ({ navigation }) => {
       })
     }, [navigation]
   );
+
+  const showConfirmDialog = () => {
+    return Alert.alert(
+      "Are you sure?",
+      "Are you sure to delete all?",
+      [
+        {
+          text: "Yes",
+          onPress: () => {
+            deleteAll(db);
+            setTrips([]);
+          },
+        },
+        {
+          text: "No",
+        },
+      ]
+    );
+  };
 
   const focusEffect = useCallback(function () {
     async function fetchData() {
@@ -43,6 +62,7 @@ const Home = ({ navigation }) => {
     fetchData();
   }, [db]);
   useFocusEffect(focusEffect);
+
 
   const handleOnPress = (tripId) => {
     navigation.navigate("DetailTrip", tripId);
