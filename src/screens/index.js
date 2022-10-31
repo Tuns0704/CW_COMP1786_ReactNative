@@ -1,5 +1,6 @@
 import Home from "./Home";
-import Trip from "./Trip";
+import EditTrip from "./EditTrip";
 import AddTrip from "./AddTrip";
+import DetailTrip from "./DetailTrip";
 
-export { Home, Trip, AddTrip };
+export { Home, EditTrip, AddTrip, DetailTrip };

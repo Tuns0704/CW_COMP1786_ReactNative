@@ -1,11 +1,11 @@
 import React, { useState, useLayoutEffect, useCallback } from 'react';
-import { StyleSheet, View, FlatList, Button, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, View, FlatList, Button, Text, SafeAreaView } from 'react-native';
 import { useFocusEffect } from "@react-navigation/native";
 import { getTrips } from "../services/db-service";
 import TripListItem from '../components/TripListItem';
 import { useDbContext } from "../context/DbContext";
 
-export default function Home({ navigation }) {
+const Home = ({ navigation }) => {
   const [trips, setTrips] = useState([]);
   const [error, setError] = useState(null);
   const db = useDbContext();
@@ -16,9 +16,14 @@ export default function Home({ navigation }) {
         headerRight: () => (
           <View style={styles.buttonLayout}>
             <Button
-              color="black"
+              color="#54B435"
               onPress={() => navigation.navigate("AddTrip")}
-              title="Delete All"
+              title="Add Trip"
+            />
+            <Button
+              color="#E14D2A"
+              onPress={() => navigation.navigate("AddTrip")}
+              title="Remove Trips"
             />
           </View>
         )
@@ -39,36 +44,46 @@ export default function Home({ navigation }) {
   }, [db]);
   useFocusEffect(focusEffect);
 
+  const handleOnPress = (tripId) => {
+    navigation.navigate("DetailTrip", tripId);
+  }
+
   if (error) {
     return <Text>{error.message}</Text>
   }
   return (
-    <View>
-      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate("AddTrip")}>
-        <Text> + </Text>
-      </TouchableOpacity>
-      <FlatList style={styles.flatList}
-        data={trips}
-        renderItem={({ item }) => <TripListItem trip={item} />}
-        keyExtractor={item => item.id}
-      />
+    <View style={styles.container}>
+      <SafeAreaView style={styles.list}>
+        <FlatList
+          data={trips}
+          renderItem={({ item }) => (
+            <TripListItem
+              trip={item}
+              onPress={() => handleOnPress({ tripId: item.id })}
+            />
+          )}
+          keyExtractor={item => item.id.toString()}
+        />
+      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerText: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    alignSelf: 'center',
-    padding: 5,
+  container: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
   },
   buttonLayout: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: 200,
     marginRight: 15,
   },
   addButton: {
-    flex: 1,
-    backgroundColor: 'lightblue',
+    flex: 0,
+    backgroundColor: '#7DE5ED',
     width: 50,
     height: 50,
     borderRadius: 50,
@@ -78,4 +93,10 @@ const styles = StyleSheet.create({
     bottom: 20,
     right: 20,
   },
+  list: {
+    flex: 1,
+    width: "100%",
+  },
 });
+
+export default Home;

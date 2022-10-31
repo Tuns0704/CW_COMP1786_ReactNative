@@ -1,20 +1,34 @@
-import React, { useState } from 'react'
-import { StyleSheet, View, SafeAreaView, TextInput, Button, Alert } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { StyleSheet, View, SafeAreaView, TextInput, Button, ScrollView, Alert } from 'react-native'
 import { RadioButton, Text } from 'react-native-paper';
-import { insertTrip } from '../services/db-service';
+import { getTripById } from '../services/db-service';
 import { useDbContext } from "../context/DbContext";
-import { ScrollView } from 'react-native-gesture-handler';
+import { updateTrip, deleteTrip } from '../services/db-service';
 
-const AddTrip = ({ navigation }) => {
-  const [name, setName] = useState('');
-  const [destination, setDestination] = useState('');
-  const [date, setDate] = useState('');
-  const [risk, setRisk] = useState('No');
-  const [description, setDescription] = useState('');
-  const [error, setError] = useState(null);
+const EditTrip = ({ navigation, route }) => {
   const db = useDbContext();
+  useEffect(function () {
+    async function fetchData() {
+      try {
+        const tripById = await getTripById(db, tripId);
+        setTrip(tripById);
+      } catch (error) {
+        setError(error);
+      }
+    }
+    fetchData();
+  }, [db]);
 
-  async function AddTrip() {
+  const [trip, setTrip] = useState([]);
+  const [name, setName] = useState(trip?.name);
+  const [destination, setDestination] = useState(trip?.destination);
+  const [date, setDate] = useState(trip?.date);
+  const [risk, setRisk] = useState(trip?.riskAssessment);
+  const [description, setDescription] = useState(trip?.description);
+  const [error, setError] = useState(null);
+  const { tripId } = route.params;
+
+  async function EditTrip() {
     if (name === "") {
       setError("Please enter Trip");
       return;
@@ -29,10 +43,10 @@ const AddTrip = ({ navigation }) => {
       return;
     }
     try {
-      await insertTrip(db, name, destination, date, risk, description);
+      await updateTrip(db, name, destination, date, risk, description, tripId);
       Alert.alert(
         'Success',
-        'Add Trip successfully',
+        'Update Trip successfully',
         [
           {
             text: 'OK',
@@ -42,7 +56,26 @@ const AddTrip = ({ navigation }) => {
         { cancelable: false }
       );
     } catch (e) {
-      setError(`An error occurred while adding the Trip: ${e.message}`);
+      setError(`An error occurred while update the Trip: ${e.message}`);
+    }
+  }
+
+  async function DeleteTrip() {
+    try {
+      await deleteTrip(db, tripId);
+      Alert.alert(
+        'Success',
+        'Delete Trip successfully',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Home')
+          }
+        ],
+        { cancelable: false }
+      );
+    } catch (e) {
+      setError(`An error occurred while delete the Trip: ${e.message}`);
     }
   }
 
@@ -50,20 +83,17 @@ const AddTrip = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.form}>
         <Text style={styles.label}>Name</Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={name => setName(name)}
-          placeholder="Trip Name" />
+        <TextInput style={styles.input}
+          onChangeText={text => setName(text)}
+          placeholder={trip.name} />
         <Text style={styles.label}>Destination</Text>
-        <TextInput
-          style={styles.input}
+        <TextInput style={styles.input}
           onChangeText={destination => setDestination(destination)}
-          placeholder="Trip Destination" />
+          placeholder={trip.destination} />
         <Text style={styles.label}>Date</Text>
-        <TextInput
-          style={styles.input}
+        <TextInput style={styles.input}
           onChangeText={date => setDate(date)}
-          placeholder="Trip Date" />
+          placeholder={trip.date} />
         <Text style={styles.label}>Risk Assessment</Text>
         <View style={styles.radioGroup}>
           <View style={styles.RadioButton}>
@@ -82,18 +112,17 @@ const AddTrip = ({ navigation }) => {
           </View>
         </View>
         <Text style={styles.label}>Description</Text>
-        <TextInput
-          style={styles.input}
+        <TextInput style={styles.input}
           onChangeText={description => setDescription(description)}
-          placeholder="Trip Destination" />
-        <Button
-          color={"#54B435"}
-          title="Add"
-          onPress={AddTrip} />
+          placeholder={trip.description} />
+        <View style={styles.buttonLayout}>
+          <Button color={"#54B435"} title="Save" onPress={EditTrip} />
+          <Button color={"#E14D2A"} title="Delete" onPress={DeleteTrip} />
+        </View>
         {error && <Text style={styles.textError}>{error}</Text>}
       </ScrollView>
     </SafeAreaView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -101,7 +130,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    paddingTop: 30,
   },
   form: {
     width: '80%',
@@ -133,6 +161,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 10,
   },
+  buttonLayout: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+  },
 });
 
-export default AddTrip;
+export default EditTrip;

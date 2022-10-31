@@ -73,12 +73,17 @@ export async function updateTrip(db, name, destination, date, risk, description,
   return db.executeSql(insertQuery);
 }
 
+export async function getTripById(db, id) {
+  const result = await db.executeSql(`SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_ID} = ${id}`);
+  return result[0].rows.item(0);
+}
+
 export async function deleteTrip(db, id) {
-  const insertQuery = `DELETE FROM ${TABLE_NAME} WHERE ${COLUMN_ID} = ${id}`;
-  return db.executeSql(insertQuery);
+  const deleteQuery = `DELETE FROM ${TABLE_NAME} WHERE ${COLUMN_ID} = ${id}`;
+  return db.executeSql(deleteQuery);
 }
 
 export async function deleteAll(db) {
-  const insertQuery = `DELETE FROM ${TABLE_NAME}`;
-  return db.executeSql(insertQuery);
+  const deleteAllQuery = `DELETE FROM ${TABLE_NAME}`;
+  return db.executeSql(deleteAllQuery);
 }
